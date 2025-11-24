@@ -16,6 +16,11 @@ logging.basicConfig(
 # Токен бота из переменных окружения
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
+# Проверим токен
+if not BOT_TOKEN:
+    logging.error("❌ BOT_TOKEN не установлен!")
+    raise ValueError("Не установлен BOT_TOKEN в переменных окружения!")
+
 # Состояния для ConversationHandler
 CHOOSING = 1
 
@@ -202,13 +207,19 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     )
     await update.message.reply_text(help_text, parse_mode='Markdown')
 
+async def error_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Обрабатывает ошибки."""
+    logging.error(f"Ошибка при обработке update {update}: {context.error}")
+
 def main() -> None:
     """Запускает бота."""
-    if not BOT_TOKEN:
-        raise ValueError("Не установлен BOT_TOKEN в переменных окружения!")
+    print("🚀 Запуск бота...")
     
     # Создаем Application
     application = Application.builder().token(BOT_TOKEN).build()
+    
+    # Добавляем обработчик ошибокpython3 get-pip.py
+    application.add_error_handler(error_handler)
     
     # Настраиваем ConversationHandler для игры
     conv_handler = ConversationHandler(
@@ -228,8 +239,8 @@ def main() -> None:
     application.add_handler(CommandHandler("stop", stop))
     
     # Запускаем бота
-    print("🤖 Бот запущен и готов к работе!")
-    print("📍 Используйте Ctrl+C для остановки")
+    print("🤖 Бот успешно запущен!")
+    print("📍 Бот готов к работе в Telegram")
     application.run_polling()
 
 if __name__ == '__main__':
